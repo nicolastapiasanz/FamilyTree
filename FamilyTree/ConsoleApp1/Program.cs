@@ -5,10 +5,10 @@ using FamilyTreeUtils.Service;
 
 public class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
         PersonDatabaseService personDatabaseService = new MongoPersonDatabaseService();
-        TestFulano(personDatabaseService);
+        await TestFulano(personDatabaseService);
 
         //var client = new MongoClient("mongodb://localhost:27017");
         //var database = client.GetDatabase("family");
@@ -36,21 +36,16 @@ public class Program
         //commonDataBase.ReplaceOne(x => x.Id == "64c5349ca501e893b942b9e6", new Person("Manolo")); //REPLACE
     }
 
-    static async void TestFulano(PersonDatabaseService personDatabaseService)
+    static async Task TestFulano(PersonDatabaseService personDatabaseService)
     {
-        var newPerson = new Person("Fulano2");
-        personDatabaseService.CreatePersonTo("common", newPerson);
-        try
-        {
-            var person = await personDatabaseService.PersonBy(newPerson.Id);
-            Console.WriteLine(person.Name);
+        var newPerson = new Person("Menganito");
+        await personDatabaseService.CreatePersonTo("common", newPerson);
 
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        var persons = personDatabaseService.PersonsBy("common");
+        persons.ToList().ForEach(x => Console.WriteLine(x.Name));
+
+        var lala = await personDatabaseService.EditPersonDataFrom(persons.First().ChangeName("Cacafuti"));
+        Console.WriteLine(lala.Name);
         var caca = 0;
     }
 

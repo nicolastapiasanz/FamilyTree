@@ -14,5 +14,16 @@ namespace FamilyTreeUtils.Models
         {
             this.Name = name;
         }
+
+        private Person(string id, string name)
+        {
+            this.Id = id;
+            this.Name = name;
+        }
+
+        public Person ChangeName(string name)
+        {
+            return new Person(name, this.Id);
+        }
     }
 }

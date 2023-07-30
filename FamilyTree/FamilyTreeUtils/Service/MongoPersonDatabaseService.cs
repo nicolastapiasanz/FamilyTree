@@ -13,22 +13,35 @@ namespace FamilyTreeUtils.Service
             this._database = client.GetDatabase("family");
         }
 
-        public async void CreatePersonTo(string collectionName, Person newPerson)
+        public async Task CreatePersonTo(string collectionName, Person newPerson)
         {
-            var collectionDataBase = this._database.GetCollection<Person>(collectionName);
-            await collectionDataBase.InsertOneAsync(newPerson, new InsertOneOptions(), CancellationToken.None);
+            try
+            {
+                var collectionDataBase = this._database.GetCollection<Person>(collectionName);
+                await collectionDataBase.InsertOneAsync(newPerson);
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public async Task<Person?> EditPersonDataFrom(Person person)
+        {
+            await ReplacePersonDataFrom(person);
+
+            var personDatabase = await PersonBy(person.Id);
+            return personDatabase;
+        }
+
+        private async Task ReplacePersonDataFrom(Person person)
         {
             if (await DoesIdExists(person.Id))
             {
                 var collection = await CollectionFrom(person.Id);
                 await collection.ReplaceOneAsync(x => x.Id == person.Id, person);
             }
-
-            var personDatabase = await PersonBy(person.Id);
-            return personDatabase;
         }
 
         public async Task<bool> DoesIdExists(string id)
@@ -45,12 +58,16 @@ namespace FamilyTreeUtils.Service
 
         private Person? PersonBy(string id, string collectionName)
         {
-            var collection = this._database.GetCollection<Person>(collectionName);
-            var filter = Builders<Person>.Filter.Eq(person => person.Id, id);
-            var person = collection.Find(filter).FirstOrDefault();
-
-            return person ?? null;
+            var personsInCollectionName = PersonsBy(collectionName);
+            return personsInCollectionName.FirstOrDefault(x => x.Id == id);
         }
+
+        public IEnumerable<Person> PersonsBy(string collectionName)
+        {
+            var collection = this._database.GetCollection<Person>(collectionName);
+            return collection.Find(x => true).ToList();
+        }
+
 
         private async Task<List<string>> CollectionNames()
         {

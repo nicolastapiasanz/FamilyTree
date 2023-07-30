@@ -4,7 +4,9 @@ namespace FamilyTreeUtils.Service
 {
     public interface PersonDatabaseService
     {
-        public void CreatePersonTo(string collectionName, Person person);
+        public Task CreatePersonTo(string collectionName, Person person);
+
+        public IEnumerable<Person> PersonsBy(string collectionName);
 
         public Task<Person?> PersonBy(string id);
 
